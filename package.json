@@ -1,0 +1,37 @@
+{
+  "name": "meta-token",
+  "version": "1.0.0",
+  "description": "meta-token-cli",
+  "main": "dist/meta-token.js",
+  "bin": "dist/meta-token.js",
+  "scripts": {
+    "test": "meta-token --help"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luciotato/meta-token-cli.git"
+  },
+  "keywords": [
+    "meta-token",
+    "token",
+    "NEAR",
+    "DEFI"
+  ],
+  "author": "Lucio Tato",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/luciotato/meta-token-cli/issues"
+  },
+  "homepage": "https://github.com/luciotato/meta-token-cli/#readme",
+  "devDependencies": {
+    "@types/bn.js": "^4.11.6",
+    "@types/node": "^14.11.2",
+    "@types/node-fetch": "^2.5.10",
+    "typescript": "^4.0.3"
+  },
+  "dependencies": {
+    "bn.js": "^5.2.0",
+    "js-sha256": "^0.9.0",
+    "node-fetch": "^2.6.1"
+  }
+}
