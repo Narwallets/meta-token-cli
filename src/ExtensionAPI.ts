@@ -8,17 +8,18 @@ import { ONE_NEAR, queryAccount } from "./near-api/near-rpc.js"
 import { yton } from "./util/conversion.js"
 
 import * as util from 'util'
-import { chedder } from "./contracts/meta-token.js"
+import { metaToken } from "./contracts/meta-token.js"
 
 // -------------------------
 // Commands API extensions
 // -------------------------
 export class ExtensionAPI extends CommandsAPI {
 
-    constructor(){super()};
+    constructor() { super() };
 
     // hm handy extension example
-    hm_HELP(){return `
+    hm_HELP() {
+        return `
     How much? 
 	converts an amount in Yoctos into a more readable format. 
     Example: 
@@ -28,11 +29,12 @@ export class ExtensionAPI extends CommandsAPI {
 
     hm(a: CommandLineArgs): void {
         const str = a.consumeString("amount")
-        console.log(color.green,a.convertAmount(str + "Y", "N", "amount"),color.normal)
+        console.log(color.green, a.convertAmount(str + "Y", "N", "amount"), color.normal)
     }
 
     // where extension example
-    where_HELP(){ return `
+    where_HELP() {
+        return `
     Where is the contract? 
     show contract accountId
     Example extension, gives the same information as: ${nickname} --info
@@ -46,12 +48,13 @@ export class ExtensionAPI extends CommandsAPI {
         a.optionalString("are")
         a.optionalString("you")
         a.noMoreArgs()
-        console.log("Contract is at ",color.green,cliConfig.contractAccount,color.normal)
-        console.log("Default user is ",color.green,cliConfig.userAccount,color.normal)
+        console.log("Contract is at ", color.green, cliConfig.contractAccount, color.normal)
+        console.log("Default user is ", color.green, cliConfig.userAccount, color.normal)
     }
 
     // balance extension example
-    state_HELP(){ return `
+    state_HELP() {
+        return `
     Get account 
     
     Usage:
@@ -63,8 +66,8 @@ export class ExtensionAPI extends CommandsAPI {
         const receiverId = a.consumeString("receiverId");
 
         let state = await queryAccount(receiverId);
-        let tokenBalance = await chedder.ft_balance_of(receiverId);
-        console.log(`Account:${receiverId}, Token Balance:${yton(tokenBalance)} $META,  Native Balance:${yton(state.amount)} N` )
+        let tokenBalance = await metaToken.ft_balance_of(receiverId);
+        console.log(`Account:${receiverId}, Token Balance:${yton(tokenBalance)} $META,  Native Balance:${yton(state.amount)} N`)
 
     }
 
@@ -80,10 +83,10 @@ export class ExtensionAPI extends CommandsAPI {
     // -----------------------------------------------
     /*
     myFn_help = `This is a command extension example with variable args. 
-	Handy commands you can create composing fn calls to this contract or others
+    Handy commands you can create composing fn calls to this contract or others
 
-	Usage:
-	>${nickname} myFn [account]+
+    Usage:
+    >${nickname} myFn [account]+
     `
     myFn(a: CommandLineArgs) {
         if (a.positional.length == 0) {

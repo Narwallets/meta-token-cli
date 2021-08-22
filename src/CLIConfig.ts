@@ -1,5 +1,5 @@
 export const cliConfig =
 {
-    userAccount: "lucio.testnet",
-    contractAccount: "token.meta.pool.testnet"
+    userAccount: "narwallets.near",
+    contractAccount: "meta-token.near"
 }

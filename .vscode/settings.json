@@ -6,6 +6,7 @@
         "cliconf",
         "cliconfig",
         "depo",
+        "metatoken",
         "ytonb"
     ]
 }

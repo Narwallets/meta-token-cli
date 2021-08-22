@@ -4,18 +4,18 @@ import * as util from "util"
 import { CommandLineArgs } from "./util/CommandLineArgs.js"
 import { options } from "./CLIOptions.js"
 import { cliConfig } from "./CLIConfig.js"
-import { chedder as metaToken } from "./contracts/meta-token.js"
+import { metaToken,MetaToken } from "./contracts/meta-token.js"
 import { ONE_NEAR, queryAccount } from "./near-api/near-rpc.js"
 import { yton } from "./util/conversion.js"
 import { isValidAccountID } from "./near-api/utils/valid.js"
 
 // name of this script
-export const nickname = "chedder"
+export const nickname = "meta-token"
 
-async function validAccount(account:string){
+async function validAccount(account: string) {
   let state = await queryAccount(account);
   let tokenBalance = await metaToken.ft_balance_of(account);
-  console.log(`Account:${account}, Token Balance:${yton(tokenBalance)} $META, Native Balance:${yton(state.amount)} N` )
+  console.log(`Account:${account}, Token Balance:${yton(tokenBalance)} $META, Native Balance:${yton(state.amount)} N`)
 }
 
 // one function for each pub fn in the contract
@@ -27,7 +27,7 @@ export class CommandsAPI {
        Mints more tokens in the owner account
       
       usage:
-      > chedder mint amount
+      > meta-token mint amount
       `};
 
   async mint(a: CommandLineArgs) /*:void*/ {
@@ -43,9 +43,9 @@ export class CommandsAPI {
 
     await validAccount(receiverId);
 
-    await metaToken.mint(receiverId,amount);
+    await metaToken.mint(receiverId, amount);
 
-    console.log(`minted ${yton(amount)} for ${receiverId}`)
+    console.log(`minted for ${receiverId} ${yton(amount)}`)
 
   }
 
@@ -84,7 +84,7 @@ export class CommandsAPI {
        Returns account ID of the token owner.
      
       usage:
-      > chedder get_owner 
+      > meta-token get_owner 
       `};
 
   async get_owner(a: CommandLineArgs) {
@@ -99,7 +99,7 @@ export class CommandsAPI {
        Transfer amount from signer to receiver with optional memo
       
       usage:
-      > chedder transfer receiverId amount memo
+      > meta-token transfer receiverId amount memo
       `};
 
   async transfer(a: CommandLineArgs) /*:void*/ {
@@ -126,7 +126,7 @@ export class CommandsAPI {
        Returns token supply 
      
       usage:
-      > chedder get_supply 
+      > meta-token get_supply 
       `};
 
   async get_supply(a: CommandLineArgs) {
@@ -143,7 +143,7 @@ export class CommandsAPI {
        Returns token balance for an account 
      
       usage:
-      > chedder balance account_id
+      > meta-token balance account_id
       `};
 
   async balance(a: CommandLineArgs) {
@@ -162,7 +162,7 @@ export class CommandsAPI {
        Returns token metadata 
      
       usage:
-      > chedder get_metadata
+      > meta-token get_metadata
       `};
 
   async get_metadata(a: CommandLineArgs) {
@@ -180,7 +180,7 @@ export class CommandsAPI {
        sets metadata icon as an optimized SVG. Use https://petercollingridge.appspot.com/svg-optimiser to create the file
      
       usage:
-      > chedder set_icon file.svg
+      > meta-token set_icon file.svg
     `};
 
   async set_icon(a: CommandLineArgs) {
@@ -196,7 +196,7 @@ export class CommandsAPI {
    Returns the number of accounts
   
   usage:
-  > chedder get_number_of_accounts 
+  > meta-token get_number_of_accounts 
   `};
   get_number_of_accounts(a ) {
     a.noMoreArgs() // no more positional args should remain

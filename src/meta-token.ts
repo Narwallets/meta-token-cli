@@ -6,7 +6,7 @@ import { CommandLineArgs, OptionDeclaration } from "./util/CommandLineArgs.js"
 import * as color from "./util/color.js"
 import { ExtensionAPI } from "./ExtensionAPI.js"
 import { saveConfig } from "./util/saveConfig.js"
-import { chedder, MetaToken } from "./contracts/meta-token.js"
+import { metaToken, MetaToken } from "./contracts/meta-token.js"
 
 import * as os from 'os';
 import * as fs from 'fs';
@@ -39,14 +39,15 @@ if (options.info.value) {
 
 function getCredentials(accountId: string) {
     const homedir = os.homedir()
-    const CREDENTIALS_FILE = path.join(homedir, ".near-credentials/default/" + accountId + ".json")
+    let folder = accountId.endsWith(".near")?"mainnet":"testnet"
+    const CREDENTIALS_FILE = path.join(homedir, ".near-credentials/"+folder+"/" + accountId + ".json")
     let credentialsString = fs.readFileSync(CREDENTIALS_FILE).toString();
     credentials = JSON.parse(credentialsString)
     if (!credentials.private_key) {
         throw Error("INVALID CREDENTIALS FILE. no priv.key")
     }
 }
-  
+
 // TODO configure
 // if (command=="configure") {
 //     args.requireOptionString(options.accountId,"default account Id")
@@ -79,23 +80,23 @@ let credentials = { account_id: "", private_key: "" };
 getCredentials(cliConfig.userAccount);
 //initialize contract proxy
 //if (env.NODE_ENV=="development")
-setNetwork('testnet');
-chedder.contract_account = cliConfig.contractAccount;
-chedder.signer = cliConfig.userAccount;
-chedder.signer_private_key = credentials.private_key;
+setNetwork('mainnet');
+metaToken.contract_account = cliConfig.contractAccount;
+metaToken.signer = cliConfig.userAccount;
+metaToken.signer_private_key = credentials.private_key;
 
-type commandFn = (a:CommandLineArgs) => void;
+type commandFn = (a: CommandLineArgs) => void;
 
-execute ( (commandAPI as any)[command], args)
+execute((commandAPI as any)[command], args)
 
-async function execute ( command:commandFn, args:any){
+async function execute(command: commandFn, args: any) {
     try {
 
         if (options.networkId.value) setNetwork(options.networkId.value);
         await command.bind(commandAPI)(args);
     }
-    catch(ex){
-        console.log(color.red+"Error:"+color.normal);
+    catch (ex) {
+        console.log(color.red + "Error:" + color.normal);
         console.error(ex);
     }
 }
