@@ -40,13 +40,13 @@ export type OptionDeclaration =
         shortName: string
         valueType?: string
         helpText?: string
-        value?: string|number|boolean
+        value?: string | number | boolean
     }
 
 // ----------------------------------------------------
 // construct and show help page based on valid options
 // ----------------------------------------------------
-export function ShowHelpOptions(optionsDeclaration: Record<string,OptionDeclaration>) :void {
+export function ShowHelpOptions(optionsDeclaration: Record<string, OptionDeclaration>): void {
     // show help about declared options
     console.log()
     console.log("-".repeat(60))
@@ -73,11 +73,11 @@ export function ShowHelpOptions(optionsDeclaration: Record<string,OptionDeclarat
 export class CommandLineArgs {
     clArgs: string[] // initial list process.argv
 
-    positional: (string | Record<string,unknown>)[] // string or JSON objects -- positional arguments
+    positional: (string | Record<string, unknown>)[] // string or JSON objects -- positional arguments
 
-    optDeclarations: Record<string,OptionDeclaration>; // pointer to passed option declarations
+    optDeclarations: Record<string, OptionDeclaration>; // pointer to passed option declarations
 
-    constructor(options: Record<string,OptionDeclaration>) {
+    constructor(options: Record<string, OptionDeclaration>) {
         this.clArgs = process.argv
         this.optDeclarations = options
         this.positional = []
@@ -149,7 +149,7 @@ export class CommandLineArgs {
      * When the first argument is the command to execute
      * returns "" if there's no arguments
      */
-    getCommand():string {
+    getCommand(): string {
         if (this.positional.length > 0 && typeof this.positional[0] !== "string") {
             color.logErr("expected a command as first argument'")
             process.exit(1)
@@ -166,7 +166,7 @@ export class CommandLineArgs {
      * returns false if the next arg doesn't match
      * @param which which string is expected
      */
-    optionalString(which:string):boolean {
+    optionalString(which: string): boolean {
         if (this.positional.length == 0) return false
 
         if (typeof this.positional[0] !== "string") {
@@ -184,7 +184,7 @@ export class CommandLineArgs {
      * requires a string as the next positional argument
      * @param name
      */
-    consumeString(name: string):string {
+    consumeString(name: string): string {
         if (this.positional.length == 0) {
             color.logErr(`expected '${name}' argument`)
             process.exit(1)
@@ -197,10 +197,23 @@ export class CommandLineArgs {
     }
 
     /**
+     * requires an integer  as the next positional argument
+     * @param name
+     */
+    consumeInt(name: string): number {
+        const s = this.consumeString(name);
+        if (parseInt(s).toString() != s) {
+            color.logErr(`invalid integer for ${name} argument, got:${s}`)
+            process.exit(1)
+        }
+        return parseInt(s)
+    }
+
+    /**
      * requires an amount in NEAR or YOCTO as the next positional argument
      * @param name
      */
-    consumeAmount(name: string, units: "N"|"Y"|"I"|"F"): string {
+    consumeAmount(name: string, units: "N" | "Y" | "I" | "F"): string {
         const value = this.consumeString(name)
         return this.convertAmount(value, units, name)
     }
@@ -210,7 +223,7 @@ export class CommandLineArgs {
      * @param name
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    consumeJSON(name: string):any {
+    consumeJSON(name: string): any {
         if (this.positional.length == 0) {
             color.logErr(`expected ${name} as { }`)
             process.exit(1)
@@ -219,15 +232,15 @@ export class CommandLineArgs {
             color.logErr(`expected ${name} as {... } got a string: '${this.positional[0]}'`)
             process.exit(1)
         }
-        return this.positional.shift() as Record<string,unknown>
+        return this.positional.shift() as Record<string, unknown>
     }
 
-    moreArgs():boolean { return this.positional.length > 0 }
+    moreArgs(): boolean { return this.positional.length > 0 }
     /**
      * marks the end of the required arguments
      * if there are more arguments => error
      */
-    noMoreArgs():void {
+    noMoreArgs(): void {
         if (this.positional.length) {
             color.logErr(`unrecognized extra arguments`)
             console.log(inspect(this.positional))
@@ -248,7 +261,7 @@ export class CommandLineArgs {
      * @param optionName option name
      */
     requireOptionString(opt: OptionDeclaration): void {
-        if (opt.value == undefined || opt.value == "" ) {
+        if (opt.value == undefined || opt.value == "") {
             const key = this.findDeclarationKey(opt)
             color.logErr(`required --${key}`)
             process.exit(1)
@@ -260,7 +273,7 @@ export class CommandLineArgs {
      * @param optionName option name
      */
     requireOptionWithAmount(opt: OptionDeclaration, units: "N" | "Y"): void {
-        const value: string = opt.value? opt.value.toString().trim() : ""
+        const value: string = opt.value ? opt.value.toString().trim() : ""
 
         const key = this.findDeclarationKey(opt)
         if (!value) {
@@ -299,7 +312,7 @@ export class CommandLineArgs {
      * @param value string as read from the command line
      * @param requiredUnits N|Y unit in which the amount is required
      */
-    convertAmount(value: string, requiredUnits: "N"|"Y"|"I"|"F", name:string): string {
+    convertAmount(value: string, requiredUnits: "N" | "Y" | "I" | "F", name: string): string {
         let result = value.toUpperCase()
         name = color.yellow + name + color.normal
         result = result.replace("_", "") // allow 100_000_000, ignore _
@@ -311,7 +324,7 @@ export class CommandLineArgs {
             }
             result = result.slice(0, -1) // remove Y
             if (requiredUnits == "Y") { return result } // already in Yoctos
-            if (requiredUnits == "I"||requiredUnits == "F") { return result } 
+            if (requiredUnits == "I" || requiredUnits == "F") { return result }
             // NEARS required -- convert to NEARS
             if (result.length <= 24) {
                 result = "0." + result.padStart(24, '0').slice(-24)
@@ -322,10 +335,10 @@ export class CommandLineArgs {
             return result
         } else { // other, assume amount in NEARS (default)
             if (!result.slice(-1).match(/\d|N|I|F/)) { //should end with N|I|F or a digit
-                color.logErr(name + ": invalid denominator, expected Y|N|I|F => yoctos|near|int|float. Received:"  + result)
+                color.logErr(name + ": invalid denominator, expected Y|N|I|F => yoctos|near|int|float. Received:" + result)
                 process.exit(1)
             }
-            if (result.endsWith("I")||result.endsWith("F")) {
+            if (result.endsWith("I") || result.endsWith("F")) {
                 result = result.slice(0, -1) // remove denom, store as number
                 return result
             }
@@ -373,7 +386,7 @@ export class CommandLineArgs {
         }
 
         // Here we have start & end for matching { }
-        const resultObj:Record<string,unknown> = {}
+        const resultObj: Record<string, unknown> = {}
         for (let index = start + 1; index < end; index++) {
             let propName = this.clArgs[index]
             let propValue
@@ -516,12 +529,12 @@ export class CommandLineArgs {
         console.log("-".repeat(60))
     }
 
-    static getMethods(API:Record<string,any>) {
-        const list=[]
+    static getMethods(API: Record<string, any>) {
+        const list = []
         const proto = Object.getPrototypeOf(API)
         for (const key of Object.getOwnPropertyNames(proto)) {
             if (key != "constructor" && key != "_call" && key != "_view" && !key.endsWith("_HELP")) {
-                list.push(key) 
+                list.push(key)
             }
         }
         return list
@@ -530,17 +543,17 @@ export class CommandLineArgs {
     // ----------------------------------------------------
     // construct and show a help page based on the API for the commands
     // ----------------------------------------------------
-    ShowHelpPage(forCommand:string, API:Record<string,any>) {
+    ShowHelpPage(forCommand: string, API: Record<string, any>) {
 
         // list functions in the Extended and ContractAPI class, except the class constructor and view/call/HELP helpers
         const list = CommandLineArgs.getMethods(API)
             .concat(CommandLineArgs.getMethods(Object.getPrototypeOf(API)))
-       
+
         list.sort()
 
         // print all commands and their help if it's there
         for (const name of list) {
-            if (forCommand && name!=forCommand) continue;
+            if (forCommand && name != forCommand) continue;
             console.log("-".repeat(60))
             console.log('command: ' + color.yellow + name + color.normal) // name the command
             //@ts-ignore

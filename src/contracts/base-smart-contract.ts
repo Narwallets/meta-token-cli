@@ -16,6 +16,7 @@ export class SmartContract {
         return near.view(this.contract_account,method,args||{});
     }
     async call(method:string, args:Record<string,any>,TGas?:number,attachedYoctoNear?:string){
+        console.log(`near call ${this.contract_account}.${method}(${JSON.stringify(args)} attached:${attachedYoctoNear||"0"})`)
         return near.call(this.contract_account,method,args,this.signer,this.signer_private_key,TGas||200,attachedYoctoNear||"0");
     }
 

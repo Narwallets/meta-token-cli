@@ -4,9 +4,9 @@ import * as util from "util"
 import { CommandLineArgs } from "./util/CommandLineArgs.js"
 import { options } from "./CLIOptions.js"
 import { cliConfig } from "./CLIConfig.js"
-import { metaToken,MetaToken } from "./contracts/meta-token.js"
-import { ONE_NEAR, queryAccount } from "./near-api/near-rpc.js"
-import { yton } from "./util/conversion.js"
+import { metaToken, MetaToken } from "./contracts/meta-token.js"
+import { ntoy, ONE_NEAR, queryAccount } from "./near-api/near-rpc.js"
+import { unix_ts, yton } from "./util/conversion.js"
 import { isValidAccountID } from "./near-api/utils/valid.js"
 
 // name of this script
@@ -27,7 +27,7 @@ export class CommandsAPI {
        Mints more tokens in the owner account
       
       usage:
-      > meta-token mint amount
+      > meta-token mint receiver_id amount
       `};
 
   async mint(a: CommandLineArgs) /*:void*/ {
@@ -78,6 +78,14 @@ export class CommandsAPI {
     let list = await metaToken.get_minters()
     console.log(JSON.stringify(list))
   }
+
+  async set_locked_until(a: CommandLineArgs) {
+    const timestamp = a.consumeString("unix timestamp")
+    a.noMoreArgs() // no more positional args should remain
+    let list = await metaToken.set_locked_until(Number(timestamp))
+    console.log(JSON.stringify(list))
+  }
+
 
   get_owner_HELP() {
     return `
@@ -190,18 +198,58 @@ export class CommandsAPI {
     await metaToken.set_metadata_icon(svgData.toString())
   }
 
-  /* commented, not available, we have to process contract state to get accounts
-  get_number_of_accounts_HELP() {
+  async vested_accounts_count_HELP() {
     return `
-   Returns the number of accounts
+   Returns the number of vested accounts
   
   usage:
-  > meta-token get_number_of_accounts 
+  > meta-token vested_accounts_count
   `};
-  get_number_of_accounts(a ) {
+
+  async vested_accounts_count(a: CommandLineArgs) {
     a.noMoreArgs() // no more positional args should remain
-    return this._view("get_number_of_accounts")
+    console.log(await metaToken.vested_accounts_count())
   }
-  */
+
+  async mint_vested(a: CommandLineArgs) /*:void*/ {
+
+    //--these are some examples on how to consume arguments
+    //const argumentJson = a.consumeJSON("{ account:userAccount, amount:xxN }")
+
+    //get fn arguments
+    const receiverId = a.consumeString("receiver account")
+    const amount = a.consumeAmount("amount", 'Y'); // get amount converted to Yoctos
+    const locked_until_timestamp = a.consumeInt("locked_until unix timestamp")
+    const start_linear_timestamp = a.consumeInt("start_linear unix timestamp")
+    const end_linear_timestamp = a.consumeInt("end_linear unix timestamp")
+    a.noMoreArgs() // no more positional args should remain
+
+    await validAccount(receiverId);
+
+    await metaToken.mint_vested(receiverId, amount, locked_until_timestamp, start_linear_timestamp, end_linear_timestamp);
+
+    console.log(`minted for ${receiverId} ${yton(amount)}`)
+
+  }
+
+  async test_mint_vested(a: CommandLineArgs) /*:void*/ {
+    const now_unix_ts = unix_ts()
+    const locked_until = now_unix_ts + 5 * 60;
+    const start_linear = now_unix_ts + 2 * 60;
+    const end_linear = now_unix_ts + 10 * 60;
+    await metaToken.mint_vested("test-narwallets.testnet", ntoy(100), locked_until, start_linear, end_linear);
+  }
+
+  async vesting_info(a: CommandLineArgs) /*:void*/ {
+    const account_id = a.consumeString("account_id")
+    a.noMoreArgs() // no more positional args should remain
+    const now_unix_ts = unix_ts()
+    console.log("now is ", now_unix_ts)
+    let result = await metaToken.get_vesting_info(account_id);
+    console.log(JSON.stringify(result));
+    console.log("to locked-until:", result.locked_until_timestamp - now_unix_ts, "sec");
+    console.log("to linear-end:", result.linear_end_timestamp - now_unix_ts, "sec");
+    console.log("locked:", BigInt(result.locked) * 100n / BigInt(result.amount), "%");
+  }
 
 }

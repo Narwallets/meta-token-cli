@@ -21,3 +21,4 @@ export function yton(yoctos:string):string {
     return str;
   }
   
+  export function unix_ts():number { return Math.trunc(new Date().getTime()/1000) };

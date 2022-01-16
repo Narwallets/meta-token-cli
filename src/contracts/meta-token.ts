@@ -34,6 +34,32 @@ export class MetaToken extends NEP141Trait {
     async set_metadata_reference(reference: string, reference_hash: string): Promise<void> {
         return this.call("set_metadata_icon", { reference: reference, reference_hash: reference_hash }, 25, "1"); //one-yocto attached
     }
+
+    async set_locked_until(unix_timestamp: number): Promise<void> {
+        return this.call("set_locked_until", { unix_timestamp: unix_timestamp }, 25);
+    }
+
+    async vested_accounts_count(): Promise<number> {
+        return this.view("vested_accounts_count", {});
+    }
+
+    async mint_vested(accountId: string, amountYoctos: U128String,
+        locked_until_unix_timestamp: number,
+        linear_start_unix_timestamp: number,
+        linear_end_unix_timestamp: number,
+    ): Promise<void> {
+        return this.call("mint_vested", { account_id: accountId, amount: amountYoctos,
+            locked_until_timestamp: locked_until_unix_timestamp,
+            linear_start_timestamp: linear_start_unix_timestamp,
+            linear_end_timestamp: linear_end_unix_timestamp,
+        }, 50, "1"); //one-yocto attached
+    }
+
+    async get_vesting_info(accountId: string): Promise<any> {
+        return this.view("get_vesting_info", { account_id: accountId});
+    }
+
+
 }
 
 //export singleton

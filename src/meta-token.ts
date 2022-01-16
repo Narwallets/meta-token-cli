@@ -75,12 +75,10 @@ if (options.help.value || !command) {
     process.exit(0)
 }
 
+setNetwork(cliConfig.net);
 // get credentials
 let credentials = { account_id: "", private_key: "" };
 getCredentials(cliConfig.userAccount);
-//initialize contract proxy
-//if (env.NODE_ENV=="development")
-setNetwork('mainnet');
 metaToken.contract_account = cliConfig.contractAccount;
 metaToken.signer = cliConfig.userAccount;
 metaToken.signer_private_key = credentials.private_key;
